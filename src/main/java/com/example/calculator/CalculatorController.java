@@ -1,22 +1,19 @@
 package com.example.calculator;
 
 import java.net.URL;
-import java.util.Objects;
 import java.util.ResourceBundle;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 
+
 public class CalculatorController {
 
-    String str, first, second, result;
+    String str, first, second;
     int func = 0;
-    boolean flag = true, pointF = true, opFlag = false;
-
-    String[] funcs = {"+", "^", "/", "*", "sqrt"};
+    boolean flagFirstOperation = true, flagOfNewOperation = false; //Первый флаг для ввода 1-го значения, второй для обнуления результата при нажатии на цифры
 
     private void reset() {
         calculatorText.setText("");
@@ -24,8 +21,7 @@ public class CalculatorController {
         first = null;
         second = null;
         func = 0;
-        flag = true;
-        pointF = true;
+        flagFirstOperation = true;
     }
 
     private void equally() {
@@ -33,71 +29,71 @@ public class CalculatorController {
         int ind;
         switch (func) {
             case 1 -> {
-                ind = calculatorText.getText().indexOf("+");
-                second = str.substring(ind + 1);
-                first = str.substring(0, ind);
-                System.out.println(first + "+" + second);
-                result = String.valueOf(Double.parseDouble(first) + Double.parseDouble(second));
-                calculatorText.setText(result);
+                second = str;
+                System.out.println(first + "+" + second + " = " + (Double.parseDouble(first) + Double.parseDouble(second)));
+                first = String.valueOf(Double.parseDouble(first) + Double.parseDouble(second));
+                calculatorText.setText(first);
+                flagOfNewOperation = true;
+                break;
             }
             case 2 -> {
-                ind = calculatorText.getText().indexOf("^");
-                second = str.substring(ind + 1);
-                first = str.substring(0, ind);
-                System.out.println(first + "^" + second);
-                result = String.valueOf(Math.pow(Double.parseDouble(first), Double.parseDouble(second)));
-                calculatorText.setText(result);
+                second = str;
+                System.out.println(first + "-" + second + " = " + (Double.parseDouble(first) - Double.parseDouble(second)));
+                first = String.valueOf(Double.parseDouble(first) - Double.parseDouble(second));
+                calculatorText.setText(first);
+                flagOfNewOperation = true;
+                break;
             }
             case 3 -> {
-                ind = calculatorText.getText().indexOf("/");
-                second = str.substring(ind + 1);
-                first = str.substring(0, ind);
-                System.out.println(first + "/" + second);
-                if (Objects.equals(second, "0")) {
+                second = str;
+                System.out.println(first + "*" + second + " = " + (Double.parseDouble(first) * Double.parseDouble(second)));
+                first = String.valueOf(Double.parseDouble(first) * Double.parseDouble(second));
+                calculatorText.setText(first);
+                flagOfNewOperation = true;
+                break;
+            }
+            case 4 -> {
+                second = str;
+                if (str.equals("0")) {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Error");
                     alert.setHeaderText("Нельзя делить на 0");
                     alert.showAndWait();
                     reset();
                 } else {
-                    result = String.valueOf(Double.parseDouble(first) / Double.parseDouble(second));
-                    calculatorText.setText(result);
+                    System.out.println(first + "/" + second + " = " + (Double.parseDouble(first) / Double.parseDouble(second)));
+                    first = String.valueOf(Double.parseDouble(first) / Double.parseDouble(second));
+                    calculatorText.setText(first);
+                    flagOfNewOperation = true;
                 }
-            }
-            case 4 -> {
-                ind = calculatorText.getText().indexOf("*");
-                second = str.substring(ind + 1);
-                first = str.substring(0, ind);
-                System.out.println(first + "*" + second);
-                result = String.valueOf(Double.parseDouble(first) * Double.parseDouble(second));
-                calculatorText.setText(result);
+                break;
             }
             case 5 -> {
-                ind = calculatorText.getText().indexOf("sqrt");
-                second = str.substring(ind + 4);
-                System.out.println("sqrt" + second);
-                if (Double.parseDouble(second) < 0) {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Error");
-                    alert.setHeaderText("Под корнем не может быть отрцательного числа");
-                    alert.showAndWait();
-                    reset();
-                } else {
-                    result = String.valueOf(Math.sqrt(Double.parseDouble(second)));
-                    calculatorText.setText(result);
-                }
+                second = str;
+                System.out.println(first + "^" + second + " = " + (Math.pow(Double.parseDouble(first), Double.parseDouble(second))));
+                first = String.valueOf(Math.pow(Double.parseDouble(first), Double.parseDouble(second)));
+                calculatorText.setText(first);
+                flagOfNewOperation = true;
+                break;
             }
             case 6 -> {
-                ind = calculatorText.getText().indexOf("-");
-                second = str.substring(ind + 1);
-                first = str.substring(0, ind);
-                System.out.println(first + "-" + second);
-                result = String.valueOf(Double.parseDouble(first) - Double.parseDouble(second));
-                calculatorText.setText(result);
+                System.out.println(Math.sqrt(Double.parseDouble(str)));
+                if (flagFirstOperation) {
+                    flagFirstOperation = false;
+                }
+                first = String.valueOf(Math.sqrt(Double.parseDouble(str)));
+                calculatorText.setText(first);
+                flagOfNewOperation = true;
+                break;
+            }
+            default -> {
+                first = str;
+                System.out.println(first);
+                calculatorText.clear();
+                break;
             }
         }
         func = 0;
-        opFlag = false;
     }
 
     @FXML
@@ -168,66 +164,34 @@ public class CalculatorController {
 
     @FXML
     void pointFunc() {
-        if (pointF) {
-            str = calculatorText.getText();
-            calculatorText.setText(str + ".");
-            pointF = false;
-        }
+        calculatorText.setText(calculatorText.getText()+".");
     }
 
     @FXML
     void degreeFunc() {
-        if (!calculatorText.getText().substring(calculatorText.getText().length() - 1).equals("^")) {
-            if (opFlag) {
-                first = calculatorText.getText();
-                calculatorText.setText(first.substring(0, first.length() - 1) + "^");
-                flag = false;
-            } else {
-                if (flag) {
-                    first = calculatorText.getText();
-                    calculatorText.setText(first + "^");
-                    flag = false;
-                } else {
-                    equally();
-                    str = calculatorText.getText();
-                    calculatorText.setText(str + "^");
-                }
-            }
-            opFlag = true;
-            pointF = true;
-            func = 2;
+        if (isDouble(calculatorText.getText())) {
+            equally();
+            func = 5;
         }
     }
 
     @FXML
     void divFunc() {
-        if (!calculatorText.getText().substring(calculatorText.getText().length() - 1).equals("/")) {
-            if (opFlag) {
-                first = calculatorText.getText();
-                calculatorText.setText(first.substring(0, first.length() - 1) + "/");
-                flag = false;
-            } else {
-                if (flag) {
-                    first = calculatorText.getText();
-                    calculatorText.setText(first + "/");
-                    flag = false;
-                } else {
-                    equally();
-                    str = calculatorText.getText();
-                    calculatorText.setText(str + "/");
-                }
-            }
-            pointF = true;
-            opFlag = true;
-            func = 3;
+        if (isDouble(calculatorText.getText())) {
+            equally();
+            func = 4;
         }
     }
 
     @FXML
     void eightFunc() {
-        str = calculatorText.getText();
-        calculatorText.setText(str + "8");
-        opFlag = false;
+        if (flagOfNewOperation) {
+            calculatorText.setText("8");
+            flagOfNewOperation = false;
+        } else {
+            str = calculatorText.getText();
+            calculatorText.setText(str + "8");
+        }
     }
 
     @FXML
@@ -237,151 +201,125 @@ public class CalculatorController {
 
     @FXML
     void fiveFunc() {
-        str = calculatorText.getText();
-        calculatorText.setText(str + "5");
-        opFlag = false;
+        if (flagOfNewOperation) {
+            calculatorText.setText("5");
+            flagOfNewOperation = false;
+        } else {
+            str = calculatorText.getText();
+            calculatorText.setText(str + "5");
+        }
     }
 
     @FXML
     void fourFunc() {
-        str = calculatorText.getText();
-        calculatorText.setText(str + "4");
-        opFlag = false;
+        if (flagOfNewOperation) {
+            calculatorText.setText("4");
+            flagOfNewOperation = false;
+        } else {
+            str = calculatorText.getText();
+            calculatorText.setText(str + "4");
+        }
     }
 
     @FXML
     void sumFunc() {
-        if (!calculatorText.getText().substring(calculatorText.getText().length() - 1).equals("+")) {
-            if (opFlag) {
-                first = calculatorText.getText();
-                calculatorText.setText(first.substring(0, first.length() - 1) + "+");
-                flag = false;
-            } else {
-                if (flag) {
-                    first = calculatorText.getText();
-                    calculatorText.setText(first + "+");
-                    flag = false;
-                } else {
-                    equally();
-                    str = calculatorText.getText();
-                    calculatorText.setText(str + "+");
-                }
-            }
-            pointF = true;
-            opFlag = true;
+        if (isDouble(calculatorText.getText())) {
+            equally();
             func = 1;
         }
     }
 
     @FXML
     void minusFunc() {
-        if (!calculatorText.getText().substring(calculatorText.getText().length() - 1).equals("-")) {
-            if (opFlag) {
-                first = calculatorText.getText();
-                calculatorText.setText(first + "-");
-                flag = false;
-                opFlag = false;
-            } else {
-                if (flag) {
-                    first = calculatorText.getText();
-                    calculatorText.setText(first + "-");
-                    if (!first.isEmpty()) {
-                        flag = false;
-                    }
-                } else {
-                    equally();
-                    str = calculatorText.getText();
-                    calculatorText.setText(str + "-");
-                }
-                opFlag = true;
-                func = 6;
-            }
-            pointF = true;
+        if (isDouble(calculatorText.getText())) {
+            equally();
+            func = 2;
         }
     }
 
     @FXML
     void multFunc() {
-        if (!calculatorText.getText().substring(calculatorText.getText().length() - 1).equals("*")) {
-            if (opFlag) {
-                first = calculatorText.getText();
-                calculatorText.setText(first.substring(0, first.length() - 1) + "*");
-                flag = false;
-            } else {
-                if (flag) {
-                    first = calculatorText.getText();
-                    calculatorText.setText(first + "*");
-                    flag = false;
-                } else {
-                    equally();
-                    str = calculatorText.getText();
-                    calculatorText.setText(str + "*");
-                }
-            }
-            opFlag = true;
-            pointF = true;
-            func = 4;
+        if (isDouble(calculatorText.getText())) {
+            equally();
+            func = 3;
         }
     }
 
     @FXML
     void nineFunc() {
-        str = calculatorText.getText();
-        calculatorText.setText(str + "9");
-        opFlag = false;
+        if (flagOfNewOperation) {
+            calculatorText.setText("9");
+            flagOfNewOperation = false;
+        } else {
+            str = calculatorText.getText();
+            calculatorText.setText(str + "9");
+        }
     }
 
     @FXML
     void oneFunc() {
-        str = calculatorText.getText();
-        calculatorText.setText(str + "1");
-        opFlag = false;
+        if (flagOfNewOperation) {
+            calculatorText.setText("1");
+            flagOfNewOperation = false;
+        } else {
+            str = calculatorText.getText();
+            calculatorText.setText(str + "1");
+        }
     }
 
     @FXML
     void sevenFunc() {
-        str = calculatorText.getText();
-        calculatorText.setText(str + "7");
-        opFlag = false;
+        if (flagOfNewOperation) {
+            calculatorText.setText("7");
+            flagOfNewOperation = false;
+        } else {
+            str = calculatorText.getText();
+            calculatorText.setText(str + "7");
+        }
     }
 
     @FXML
     void sixFunc() {
-        str = calculatorText.getText();
-        calculatorText.setText(str + "6");
-        opFlag = false;
+        if (flagOfNewOperation) {
+            calculatorText.setText("6");
+            flagOfNewOperation = false;
+        } else {
+            str = calculatorText.getText();
+            calculatorText.setText(str + "6");
+        }
     }
 
     @FXML
     void sqrtFunc() {
-        if (calculatorText.getText().charAt(0) != 's') {
-            if (opFlag) {
-                first = calculatorText.getText();
-                System.out.println(first);
-                calculatorText.setText("sqrt" + first.substring(0, first.length() - 1));
-            } else {
+        if (isDouble(calculatorText.getText())) {
+            if (func != 0) {
                 equally();
-                str = calculatorText.getText();
-                calculatorText.setText("sqrt" + str);
             }
-            flag = false;
-            opFlag = false;
-            func = 5;
+            func = 6;
+            equally();
         }
     }
 
     @FXML
     void threeFunc() {
-        str = calculatorText.getText();
-        calculatorText.setText(str + "3");
-        opFlag = false;
+        if (flagOfNewOperation) {
+            calculatorText.setText("3");
+            flagOfNewOperation = false;
+        } else {
+            str = calculatorText.getText();
+            calculatorText.setText(str + "3");
+        }
     }
 
     @FXML
     void twoFunc() {
-        str = calculatorText.getText();
-        calculatorText.setText(str + "2");
-        opFlag = false;
+        if (flagOfNewOperation) {
+            calculatorText.setText("2");
+            flagOfNewOperation = false;
+        } else {
+            str = calculatorText.getText();
+            calculatorText.setText(str + "2");
+        }
     }
 
     @FXML
@@ -391,58 +329,32 @@ public class CalculatorController {
 
     @FXML
     void zeroFunc() {
-        str = calculatorText.getText();
-        calculatorText.setText(str + "0");
-        opFlag = false;
+        if (flagOfNewOperation) {
+            calculatorText.setText("0");
+            flagOfNewOperation = false;
+        } else {
+            str = calculatorText.getText();
+            calculatorText.setText(str + "0");
+        }
     }
 
     @FXML
     void calculatorFunc() {
-        boolean sqrtFlag = false;
-        int ind = 0;
-        str = calculatorText.getText();
-        if (!str.replace("sqrt","").matches("[a-zA-Z]+")) {
-            for (int i = 0; i < 5; i++) {
-                if (str.contains(funcs[i])) {
-                    if (i == 4) {
-                        sqrtFlag = true;
-                    }
-                    func = i + 1;
-                    ind = str.indexOf(funcs[i]);
-                    break;
-                }
-            }
-            if (str.contains("-") && func == 0) {
-                func = 6;
-                ind = str.indexOf("-");
-            }
-            if (func == 0) {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Error");
-                alert.setHeaderText("Введите данные формата: число(операция)число");
-                alert.showAndWait();
-                reset();
-            } else {
-                String f = str.substring(0, ind), s;
-                if (sqrtFlag)
-                    s = str.substring(ind + 4);
-                else
-                    s = str.substring(ind + 1);
-                if (f.chars().filter(c -> c == '.').count() > 1 || s.chars().filter(c -> c == '.').count() > 1) {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Error");
-                    alert.setHeaderText("В одном числе не может быть больше 1 точки");
-                    alert.showAndWait();
-                    reset();
-                } else
-                    equally();
-            }
-        } else {
+        isDouble(calculatorText.getText());
+    }
+
+    private boolean isDouble(String message) {
+        try {
+            double number = Double.parseDouble(message);
+            System.out.println(number);
+            return true;
+        } catch (NumberFormatException e) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Error");
-            alert.setHeaderText("Должны бить только цифры и операции");
+            alert.setHeaderText("Неправильно введено число");
             alert.showAndWait();
             reset();
+            return false;
         }
     }
 
@@ -469,5 +381,4 @@ public class CalculatorController {
         assert twoButton != null : "fx:id=\"twoButton\" was not injected: check your FXML file 'calculator.fxml'.";
         assert zeroButton != null : "fx:id=\"zeroButton\" was not injected: check your FXML file 'calculator.fxml'.";
     }
-
 }
